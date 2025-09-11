@@ -2,31 +2,33 @@ const net = require('net');
 const port = 8000;
 
 const server = net.createServer((clientSocket) => {
-    clientSocket.once('data', (data) => {
-    const isConnect = data.toString().indexOf('CONNECT') === 0;
+  clientSocket.once('data', (data) => {
+    const req = data.toString();
+    const isConnect = req.indexOf('CONNECT') === 0;
 
     if (isConnect) {
-      const parts = data.toString().split(' ');
-      const [hostname, port] = parts[1].split(':');
+      const parts = req.split(' ');
+      const [hostname, targetPort] = parts[1].split(':');
 
-      console.log(`Establishing HTTPS tunnel to: ${hostname}:${port}`);
+      console.log(`Establishing HTTPS tunnel to: ${hostname}:${targetPort}`);
 
-      const targetSocket = net.createConnection({
+      const targetSocket = net.createConnection(
+        { host: hostname, port: parseInt(targetPort) || 443 },
+        () => {
+          clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
 
-        host: hostname,
-        port: parseInt(port) || 443
-      
-    }, function() {
-        
-        clientSocket.write('connection made');
-        clientSocket.pipe(targetSocket);
-        targetSocket.pipe(clientSocket);
-      
-    });
+          clientSocket.pipe(targetSocket);
+          targetSocket.pipe(clientSocket);
+        }
+      );
 
+      targetSocket.on('error', (err) => {
+        console.error('Target socket error:', err);
+        clientSocket.end();
+      });
     } else {
-      console.log('Non-HTTPS, Closing connection.');
-      clientSocket.end('not allowed');
+      console.log('Non-HTTPS request (direct HTTP), closing.');
+      clientSocket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
     }
   });
 
@@ -34,6 +36,7 @@ const server = net.createServer((clientSocket) => {
     console.error('Client socket error:', err);
   });
 });
+
 server.listen(port, '0.0.0.0', () => {
-  console.log(`proxy live on ${port}`);
+  console.log(`Proxy live on ${port}`);
 });
