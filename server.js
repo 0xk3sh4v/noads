@@ -35,5 +35,5 @@ const server = net.createServer((clientSocket) => {
   });
 });
 server.listen(port, '0.0.0.0', () => {
-  console.log(`proxy live on ${PROXY_PORT}`);
+  console.log(`proxy live on ${port}`);
 });
