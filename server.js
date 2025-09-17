@@ -1,6 +1,8 @@
 const net = require('net');
 const port = 8000;
 
+// osi layer 4 (application communication, no API)
+
 const server = net.createServer((clientSocket) => {
   clientSocket.once('data', (data) => {
     const req = data.toString();
@@ -10,30 +12,35 @@ const server = net.createServer((clientSocket) => {
       const parts = req.split(' ');
       const [hostname, targetPort] = parts[1].split(':');
 
-      console.log(`Establishing HTTPS tunnel to: ${hostname}:${targetPort}`);
+      console.log(`tunnel connection to: ${hostname}:${targetPort}`);
 
+      // creating connection from the proxy device.
       const targetSocket = net.createConnection(
-        { host: hostname, port: parseInt(targetPort) || 443 },
-        () => {
-          clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+        { host: hostname, port: parseInt(targetPort) || 443 }, function () {
 
+          clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
           clientSocket.pipe(targetSocket);
           targetSocket.pipe(clientSocket);
+
         }
       );
 
-      targetSocket.on('error', (err) => {
-        console.error('Target socket error:', err);
+      // if the connection throws error, drop connection.
+      targetSocket.on('error', function(err) {
+        console.error(`connected socket ${hostname}:${port} threw an error, most likely CONRESET`);
         clientSocket.end();
       });
-    } else {
-      console.log('Non-HTTPS request (direct HTTP), closing.');
-      clientSocket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
+
+    } 
+    
+    else {
+      console.log('Non https, not secure to connect, dropping connection.');
+      clientSocket.end('HTTP/1.1 404 Not Found\r\n\r\n');
     }
   });
 
   clientSocket.on('error', (err) => {
-    console.error('Client socket error:', err);
+    console.error('Connection dropped from host, you either removed closed the task or got kicked.');
   });
 });
 

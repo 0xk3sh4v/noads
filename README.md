@@ -2,16 +2,24 @@
 
 - noAds is a project that identifies and blocks any advertisements while enjoying your favourite music on your favourite platforms.
 
-### workflow
+- For a cherry on top, I have also added all useless survey and update connections from Microsoft aswell, because I hate being spied on a local (offline) account.
 
-- When a request is made for a nameserver that contains an ad url from a known provider, the proxy blocks the request and drops the request, hence killing the advertisement.
+### Workflow
 
-### policy
+- When a connection is made for a nameserver that contains an ad url or a known update connection point from a known provider, the proxy blocks the request and drops the request, hence killing the advertisement and not sending your data over to Microsoft.
 
-- The code is completely opensource and I recommend to selfhost on localhost for privacy and anonimity purposes. But if that is too much work for you, I have hosted this dns blocker on my vps and here is the connection info
+### Policy
+
+- The code is completely opensource and I recommend to selfhost on localhost for privacy and anonimity purposes. Anyone who knows anything about privacy and networks would know how much this project can be abused to spy on your private information like credentials and everything, hence I recommend to not trust anyone and self-hosting this project to enjoy everything. ~~But if that is too much work for you, I have hosted this on my own website.~~
 
 ```bash
-someip:someport
+REMOVED
 ```
 
-(p.s: I am hosting this in my room, please be gentle with the usage.)
+~~(p.s: I am hosting this in my room, please be gentle with the usage.)~~
+
+### TO-DO
+
+- add layer 7 monitor to block and monitor certain endpoints 
+- add layer 3 monitor to monitor network handshake connections, ICMP echo and ICMP raw
+- add custom blocklist for users to block their own custom endpoints and connections
