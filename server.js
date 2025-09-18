@@ -1,49 +1,37 @@
-const net = require('net');
-const port = 8000;
+'use strict';
 
-// osi layer 4 (application communication, no API)
+const net = require('net');
+
+const layer4 = require('./src/layer4');
+
+const PORT = process.env.PORT || 8000;
 
 const server = net.createServer((clientSocket) => {
-  clientSocket.once('data', (data) => {
-    const req = data.toString();
-    const isConnect = req.indexOf('CONNECT') === 0;
-
-    if (isConnect) {
-      const parts = req.split(' ');
-      const [hostname, targetPort] = parts[1].split(':');
-
-      console.log(`tunnel connection to: ${hostname}:${targetPort}`);
-
-      // creating connection from the proxy device.
-      const targetSocket = net.createConnection(
-        { host: hostname, port: parseInt(targetPort) || 443 }, function () {
-
-          clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-          clientSocket.pipe(targetSocket);
-          targetSocket.pipe(clientSocket);
-
-        }
-      );
-
-      // if the connection throws error, drop connection.
-      targetSocket.on('error', function(err) {
-        console.error(`connected socket ${hostname}:${port} threw an error, most likely CONRESET`);
-        clientSocket.end();
-      });
-
-    } 
-    
-    else {
-      console.log('Non https, not secure to connect, dropping connection.');
-      clientSocket.end('HTTP/1.1 404 Not Found\r\n\r\n');
-    }
+  clientSocket.setTimeout(30000);
+  clientSocket.on('timeout', function() {
+    console.error('client socket timeout, ending connection.');
+    clientSocket.end();
   });
 
-  clientSocket.on('error', (err) => {
-    console.error('Connection dropped from host, you either removed closed the task or got kicked.');
+  clientSocket.once('data', function(data) {
+    const reqStr = data.toString();
+    const isConnect = reqStr.indexOf('CONNECT') === 0;
+
+    if (isConnect) {
+      layer4.handleTunnel(clientSocket, reqStr);
+    }
+    
+  });
+
+  clientSocket.on('error', function(err) {
+    console.error('Connection dropped from host, err=', (err && err.message));
   });
 });
 
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Proxy live on ${port}`);
+server.on('error', function(err) {
+  console.error('Proxy server error:', err.message);
+});
+
+server.listen(PORT, '0.0.0.0', function() {
+  console.log('Proxy live on ' + PORT);
 });
