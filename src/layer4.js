@@ -11,7 +11,7 @@ function handleTunnel(clientSocket, reqStr) {
   const hostname = target[0];
   const targetPort = parseInt(target[1]) || 443;
 
-  console.log('[LAYER 4] tunnel connection to: ' + hostname + ':' + targetPort);
+  console.log('[LAYER 4] ' + hostname + ':' + targetPort);
 
   const targetSocket = net.createConnection({ host: hostname, port: targetPort }, function () {
 
@@ -22,7 +22,7 @@ function handleTunnel(clientSocket, reqStr) {
 
   targetSocket.on('error', function (err) {
 
-    console.error('[LAYER 4] connected socket ' + hostname + ':' + targetPort + ' threw an error: ' + err.message);
+    console.error('[LAYER 4] ' + hostname + ':' + targetPort + ' threw: ' + err.message);
     
     try { clientSocket.end(); } 
     catch (e) { /* no task to be done*/ }
@@ -38,7 +38,7 @@ function handleTunnel(clientSocket, reqStr) {
 
   clientSocket.setTimeout(30000, () => {
   
-    console.error('[LAYER 4] client socket timeout, ending connection.');
+    console.error('[LAYER 4] client socket timeout, dropping.');
     clientSocket.end();
     targetSocket.end();
   
