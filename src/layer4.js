@@ -1,17 +1,49 @@
 'use strict';
 
 const net = require('net');
+const fs = require('fs');
+const path = require('path');
+
+const sourcesDir = path.join(__dirname, '../blocksource');
+
+function loadBlocklist() {
+  let domains = new Set();
+  const files = fs.readdirSync(sourcesDir);
+
+  for (const file of files) {
+    const fullPath = path.join(sourcesDir, file);
+    if (fs.statSync(fullPath).isFile()) {
+      const lines = fs.readFileSync(fullPath, 'utf8')
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith('#')); // comments in blocklist files are given by #, for further reference.
+      lines.forEach(d => domains.add(d.toLowerCase()));
+    }
+  }
+  return domains;
+}
+
+const blocklist = loadBlocklist();
 
 // Layer 4 - TCP tunnel
-
 function handleTunnel(clientSocket, reqStr) {
   
   const parts = reqStr.split(' ');
   const target = (parts[1] || '').split(':');
-  const hostname = target[0];
+  const hostname = (target[0] || '').toLowerCase();
   const targetPort = parseInt(target[1]) || 443;
 
   console.log('[LAYER 4] ' + hostname + ':' + targetPort);
+
+  if (blocklist.has(hostname)) {
+    console.log('[DROPPED] ' + hostname);
+
+    // clientSocket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); // might break some clients
+    
+    clientSocket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+    clientSocket.end();
+    return;
+  }
 
   const targetSocket = net.createConnection({ host: hostname, port: targetPort }, function () {
 

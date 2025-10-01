@@ -3,7 +3,6 @@
 const net = require('net');
 
 const layer4 = require('./src/layer4');
-const layer7 = require('./src/layer7');
 
 const PORT = process.env.PORT || 8000;
 
@@ -21,7 +20,8 @@ const server = net.createServer((clientSocket) => {
     if (isConnect) {
       layer4.handleTunnel(clientSocket, reqStr);
     } else {
-      layer7.handleHttp(clientSocket, data);
+      // layer7.handleHttp(clientSocket, data);
+      // for now, just ignore non transport layer traffic
     }
   });
 
