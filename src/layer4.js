@@ -5,7 +5,7 @@ const net = require('net');
 // Layer 4 - TCP tunnel
 
 function handleTunnel(clientSocket, reqStr) {
-  // parse CONNECT line
+  
   const parts = reqStr.split(' ');
   const target = (parts[1] || '').split(':');
   const hostname = target[0];

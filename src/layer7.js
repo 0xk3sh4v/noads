@@ -30,13 +30,12 @@ function parseHostFromHttp(httpStr) {
 function handleHttp(clientSocket, initialBuf) {
   const reqStr = initialBuf.toString();
 
-  console.log('[LAYER 7] incoming HTTP request (capturing request line & headers)');
   const firstLine = reqStr.split('\r\n')[0] || '';
   console.log('[LAYER 7] ' + firstLine);
 
   const hostInfo = parseHostFromHttp(reqStr);
   if (!hostInfo) {
-    console.error('[LAYER 7] could not find Host header, dropping connection.');
+    console.error(`[LAYER 7] could not find Host header, dropping connection ${firstLine}.`);
     try {
       clientSocket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
     } catch (e) {
@@ -47,7 +46,6 @@ function handleHttp(clientSocket, initialBuf) {
 
   const hostname = hostInfo.hostname;
   const targetPort = hostInfo.port;
-  console.log('[LAYER 7] forwarding to ' + hostname + ':' + targetPort);
 
   const targetSocket = net.createConnection({ host: hostname, port: targetPort }, function () {
     targetSocket.write(initialBuf);
