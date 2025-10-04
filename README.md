@@ -6,6 +6,8 @@
 
 - This project also runs on community contributions, so please if you find any new nameserver that I might have missed, make a pull request!
 
+- test
+
 ### Workflow
 
 - When a connection is made for a nameserver that contains an ad url or a known update connection point from a known provider, the proxy makes the request but sends back a 404 Not Found, hence killing the advertisement and not sending your data over to Microsoft.
