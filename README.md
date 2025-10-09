@@ -6,7 +6,11 @@
 
 - This project also runs on community contributions, so please if you find any new nameserver that I might have missed, make a pull request!
 
-- test
+### Features
+
+- Almost 0$ downtime from the script
+
+- Can handle HTTP/S even on a non TLS hosting or network (a simple tunnel).
 
 ### Workflow
 
