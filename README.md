@@ -2,7 +2,7 @@
 
 - noAds is a project that identifies and blocks any advertisements while enjoying your favourite music on your favourite platforms.
 
-- For a cherry on top, I have also added all useless survey and update connections from Microsoft aswell, because I hate being spied on a local (offline) account.
+- For a cherry on top, I have also added all useless survey and update connections from Microsoft aswell, because I hate being spied on a local (offline) account. (for this to work, you will need to also set the WinHTTP proxy.)
 
 - This project also runs on community contributions, so please if you find any new nameserver that I might have missed, make a pull request!
 
